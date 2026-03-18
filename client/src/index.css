@@ -66,3 +66,168 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.documents-page,
+.documents-layout,
+.documents-main,
+.documents-list-card,
+.document-grid,
+.document-card,
+.document-card-top,
+.document-card-main,
+.document-actions {
+  min-width: 0;
+}
+
+.documents-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.documents-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.documents-main {
+  min-width: 0;
+}
+
+.documents-list-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.document-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  min-width: 0;
+}
+
+.document-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.document-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.document-card-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.document-card h3,
+.document-meta,
+.document-note,
+.document-folder-chip,
+.folder-node-label,
+.documents-list-title {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.document-card h3 {
+  margin: 0 0 8px;
+  line-height: 1.25;
+}
+
+.document-meta {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.document-note {
+  line-height: 1.5;
+}
+
+.document-folder-chip {
+  flex-shrink: 0;
+  max-width: 120px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.document-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.document-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.document-actions button {
+  min-width: 0;
+}
+
+.documents-form input,
+.documents-form textarea,
+.documents-form select {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.selected-files-list li,
+.folder-node-btn {
+  min-width: 0;
+}
+
+.folder-node-label {
+  display: block;
+}
+
+@media (max-width: 1024px) {
+  .documents-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .documents-sidebar {
+    order: 2;
+  }
+
+  .documents-main {
+    order: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .document-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .document-card-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .document-folder-chip {
+    max-width: 100%;
+    width: fit-content;
+  }
+
+  .documents-form-actions .btn,
+  .document-actions button {
+    width: 100%;
+  }
+
+  .document-actions {
+    flex-direction: column;
+  }
+}
