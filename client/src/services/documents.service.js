@@ -62,21 +62,18 @@ export async function downloadDocument(id, originalName) {
   window.URL.revokeObjectURL(url);
 }
 
-export function deleteDocument(id) {
-  return apiFetch(`/documents/${id}`, {
-    method: "DELETE",
-  });
-}
-
 export async function previewDocument(id) {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE_URL}/api/documents/${id}/download`, {
-    method: "GET",
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/api/documents/${id}/download`,
+    {
+      method: "GET",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    }
+  );
 
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
@@ -89,4 +86,10 @@ export async function previewDocument(id) {
     blob,
     mimeType: blob.type || response.headers.get("content-type") || "",
   };
+}
+
+export function deleteDocument(id) {
+  return apiFetch(`/documents/${id}`, {
+    method: "DELETE",
+  });
 }
