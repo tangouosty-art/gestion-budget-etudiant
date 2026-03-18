@@ -5,6 +5,7 @@ import {
   uploadDocument,
   downloadDocument,
   deleteDocument,
+  previewDocument,
 } from "../services/documents.service";
 import { formatDate } from "../utils/formatDate";
 
@@ -63,6 +64,14 @@ export default function Documents() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  const [preview, setPreview] = useState({
+    open: false,
+    title: "",
+    mimeType: "",
+    url: "",
+    textContent: "",
+  });
+
   async function loadDocumentsModule() {
     setLoading(true);
     setError("");
@@ -85,6 +94,14 @@ export default function Documents() {
   useEffect(() => {
     loadDocumentsModule();
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (preview.url) {
+        URL.revokeObjectURL(preview.url);
+      }
+    };
+  }, [preview.url]);
 
   const filteredDocuments = useMemo(() => {
     if (selectedFolder === "all") return documents;
@@ -165,6 +182,83 @@ export default function Documents() {
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  const handlePreview = async (doc) => {
+    setError("");
+    setMessage("");
+
+    try {
+      const { blob, mimeType } = await previewDocument(doc.id);
+      const url = URL.createObjectURL(blob);
+
+      if (mimeType.startsWith("text/")) {
+        const textContent = await blob.text();
+        setPreview({
+          open: true,
+          title: doc.original_name,
+          mimeType,
+          url,
+          textContent,
+        });
+      } else {
+        setPreview({
+          open: true,
+          title: doc.original_name,
+          mimeType,
+          url,
+          textContent: "",
+        });
+      }
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const closePreview = () => {
+    if (preview.url) {
+      URL.revokeObjectURL(preview.url);
+    }
+
+    setPreview({
+      open: false,
+      title: "",
+      mimeType: "",
+      url: "",
+      textContent: "",
+    });
+  };
+
+  const renderPreviewContent = () => {
+    if (preview.mimeType === "application/pdf") {
+      return (
+        <iframe
+          src={preview.url}
+          title={preview.title}
+          className="document-preview-frame"
+        />
+      );
+    }
+
+    if (preview.mimeType.startsWith("image/")) {
+      return (
+        <img
+          src={preview.url}
+          alt={preview.title}
+          className="document-preview-image"
+        />
+      );
+    }
+
+    if (preview.mimeType.startsWith("text/")) {
+      return <pre className="document-preview-text">{preview.textContent}</pre>;
+    }
+
+    return (
+      <p className="document-preview-empty">
+        Prévisualisation non disponible pour ce type de fichier.
+      </p>
+    );
   };
 
   return (
@@ -304,9 +398,14 @@ export default function Documents() {
                     </div>
 
                     <div className="document-actions">
+                      <button type="button" onClick={() => handlePreview(doc)}>
+                        Visualiser
+                      </button>
+
                       <button type="button" onClick={() => handleDownload(doc)}>
                         Télécharger
                       </button>
+
                       <button
                         type="button"
                         className="danger-btn"
@@ -322,6 +421,26 @@ export default function Documents() {
           </div>
         </div>
       </div>
+
+      {preview.open && (
+        <div className="document-preview-overlay" onClick={closePreview}>
+          <div
+            className="document-preview-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="document-preview-header">
+              <h3>{preview.title}</h3>
+              <button type="button" onClick={closePreview}>
+                Fermer
+              </button>
+            </div>
+
+            <div className="document-preview-body">
+              {renderPreviewContent()}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

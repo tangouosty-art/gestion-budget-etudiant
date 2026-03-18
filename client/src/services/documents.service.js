@@ -67,3 +67,26 @@ export function deleteDocument(id) {
     method: "DELETE",
   });
 }
+
+export async function previewDocument(id) {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}/api/documents/${id}/download`, {
+    method: "GET",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.message || "Prévisualisation impossible");
+  }
+
+  const blob = await response.blob();
+
+  return {
+    blob,
+    mimeType: blob.type || response.headers.get("content-type") || "",
+  };
+}
