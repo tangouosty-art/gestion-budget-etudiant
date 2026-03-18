@@ -1,7 +1,7 @@
 import { apiFetch } from "./api";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export function getDocuments() {
   return apiFetch("/documents");
@@ -14,7 +14,7 @@ export function getDocumentsTree() {
 export async function uploadDocument(formData) {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE_URL}/documents/upload`, {
+  const response = await fetch(`${API_BASE_URL}/api/documents/upload`, {
     method: "POST",
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -34,12 +34,15 @@ export async function uploadDocument(formData) {
 export async function downloadDocument(id, originalName) {
   const token = localStorage.getItem("token");
 
-  const response = await fetch(`${API_BASE_URL}/documents/${id}/download`, {
-    method: "GET",
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/api/documents/${id}/download`,
+    {
+      method: "GET",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    }
+  );
 
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
