@@ -5,7 +5,6 @@ import {
   uploadDocument,
   downloadDocument,
   deleteDocument,
-  previewDocument,
 } from "../services/documents.service";
 import { formatDate } from "../utils/formatDate";
 
@@ -26,9 +25,8 @@ function FolderNode({ node, selectedFolder, onSelect }) {
           selectedFolder === node.path ? "active" : ""
         }`}
         onClick={() => onSelect(node.path)}
-        title={node.name}
       >
-        <span className="folder-node-label">{node.name}</span>
+        {node.name}
       </button>
 
       {node.children?.length > 0 && (
@@ -59,19 +57,9 @@ export default function Documents() {
   });
   const [files, setFiles] = useState([]);
 
-  const [preview, setPreview] = useState({
-    open: false,
-    title: "",
-    mimeType: "",
-    url: "",
-    textContent: "",
-  });
-
   const fileInputRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [actionId, setActionId] = useState(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -88,7 +76,7 @@ export default function Documents() {
       setDocuments(documentsRes.documents || []);
       setTree(treeRes.tree || []);
     } catch (err) {
-      setError(err.message || "Impossible de charger les documents.");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -97,14 +85,6 @@ export default function Documents() {
   useEffect(() => {
     loadDocumentsModule();
   }, []);
-
-  useEffect(() => {
-    return () => {
-      if (preview.url) {
-        URL.revokeObjectURL(preview.url);
-      }
-    };
-  }, [preview.url]);
 
   const filteredDocuments = useMemo(() => {
     if (selectedFolder === "all") return documents;
@@ -129,17 +109,15 @@ export default function Documents() {
     setMessage("");
 
     if (!files.length) {
-      setError("Sélectionne au moins un fichier.");
+      setError("Sélectionne au moins un fichier");
       return;
     }
 
     try {
-      setUploading(true);
-
       const formData = new FormData();
-      formData.append("title", form.title.trim());
-      formData.append("folder_path", form.folder_path.trim());
-      formData.append("note", form.note.trim());
+      formData.append("title", form.title);
+      formData.append("folder_path", form.folder_path);
+      formData.append("note", form.note);
 
       files.forEach((file) => {
         formData.append("files", file);
@@ -158,12 +136,10 @@ export default function Documents() {
         fileInputRef.current.value = "";
       }
 
-      setMessage("Document(s) importé(s) avec succès.");
+      setMessage("Document(s) importé(s) avec succès");
       await loadDocumentsModule();
     } catch (err) {
-      setError(err.message || "Import impossible.");
-    } finally {
-      setUploading(false);
+      setError(err.message);
     }
   };
 
@@ -172,14 +148,11 @@ export default function Documents() {
     setMessage("");
 
     try {
-      setActionId(documentId);
       await deleteDocument(documentId);
-      setMessage("Document supprimé avec succès.");
+      setMessage("Document supprimé avec succès");
       await loadDocumentsModule();
     } catch (err) {
-      setError(err.message || "Suppression impossible.");
-    } finally {
-      setActionId(null);
+      setError(err.message);
     }
   };
 
@@ -188,109 +161,16 @@ export default function Documents() {
     setMessage("");
 
     try {
-      setActionId(doc.id);
       await downloadDocument(doc.id, doc.original_name);
     } catch (err) {
-      setError(err.message || "Téléchargement impossible.");
-    } finally {
-      setActionId(null);
+      setError(err.message);
     }
-  };
-
-  const closePreview = () => {
-    setPreview((prev) => {
-      if (prev.url) {
-        URL.revokeObjectURL(prev.url);
-      }
-
-      return {
-        open: false,
-        title: "",
-        mimeType: "",
-        url: "",
-        textContent: "",
-      };
-    });
-  };
-
-  const handlePreview = async (doc) => {
-    setError("");
-    setMessage("");
-
-    try {
-      setActionId(doc.id);
-
-      const { blob, mimeType } = await previewDocument(doc.id);
-      const objectUrl = URL.createObjectURL(blob);
-
-      if (mimeType.startsWith("text/")) {
-        const textContent = await blob.text();
-        setPreview({
-          open: true,
-          title: doc.original_name,
-          mimeType,
-          url: objectUrl,
-          textContent,
-        });
-        return;
-      }
-
-      setPreview({
-        open: true,
-        title: doc.original_name,
-        mimeType,
-        url: objectUrl,
-        textContent: "",
-      });
-    } catch (err) {
-      setError(err.message || "Prévisualisation impossible.");
-    } finally {
-      setActionId(null);
-    }
-  };
-
-  const renderPreviewContent = () => {
-    if (!preview.open) return null;
-
-    if (preview.mimeType === "application/pdf") {
-      return (
-        <iframe
-          src={preview.url}
-          title={preview.title}
-          className="document-preview-frame"
-        />
-      );
-    }
-
-    if (preview.mimeType.startsWith("image/")) {
-      return (
-        <div className="document-preview-image-wrap">
-          <img
-            src={preview.url}
-            alt={preview.title}
-            className="document-preview-image"
-          />
-        </div>
-      );
-    }
-
-    if (preview.mimeType.startsWith("text/")) {
-      return (
-        <pre className="document-preview-text">{preview.textContent}</pre>
-      );
-    }
-
-    return (
-      <div className="document-preview-empty">
-        Prévisualisation non disponible pour ce type de fichier.
-      </div>
-    );
   };
 
   return (
-    <div className="page documents-page">
-      <div className="page-header documents-page-header">
-        <div className="page-header-content">
+    <div className="page">
+      <div className="page-header">
+        <div>
           <h1>Documents</h1>
           <p className="page-subtitle">
             Importe plusieurs fichiers depuis ton appareil et range-les dans un
@@ -313,7 +193,7 @@ export default function Documents() {
             }`}
             onClick={() => setSelectedFolder("all")}
           >
-            <span className="folder-node-label">Tous les documents</span>
+            Tous les documents
           </button>
 
           {tree.length === 0 ? (
@@ -333,74 +213,57 @@ export default function Documents() {
         </aside>
 
         <div className="documents-main">
-          <form className="card form-card documents-form" onSubmit={handleUpload}>
+          <form
+            className="card form-card"
+            onSubmit={handleUpload}
+            style={{ marginBottom: 16 }}
+          >
             <h2>Importer des documents</h2>
 
-            <div className="documents-form-grid">
-              <input
-                type="text"
-                name="title"
-                value={form.title}
-                onChange={handleChange}
-                placeholder="Titre personnalisé (utile pour un seul fichier)"
-                disabled={uploading}
-              />
+            <input
+              type="text"
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              placeholder="Titre personnalisé (utile pour un seul fichier)"
+            />
 
-              <input
-                type="text"
-                name="folder_path"
-                value={form.folder_path}
-                onChange={handleChange}
-                placeholder="Ex: Administratif/CAF"
-                disabled={uploading}
-              />
+            <input
+              type="text"
+              name="folder_path"
+              value={form.folder_path}
+              onChange={handleChange}
+              placeholder="Ex: Administratif/CAF"
+            />
 
-              <textarea
-                name="note"
-                value={form.note}
-                onChange={handleChange}
-                placeholder="Note (optionnel)"
-                rows="4"
-                disabled={uploading}
-              />
+            <textarea
+              name="note"
+              value={form.note}
+              onChange={handleChange}
+              placeholder="Note (optionnel)"
+              rows="4"
+            />
 
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                onChange={(e) => setFiles(Array.from(e.target.files || []))}
-                disabled={uploading}
-              />
-            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              onChange={(e) => setFiles(Array.from(e.target.files || []))}
+            />
 
             {files.length > 0 && (
-              <div className="selected-files-box">
-                <p className="selected-files-info">
-                  {files.length} fichier(s) sélectionné(s)
-                </p>
-
-                <ul className="selected-files-list">
-                  {files.map((file, index) => (
-                    <li key={`${file.name}-${index}`} title={file.name}>
-                      <span className="selected-file-name">{file.name}</span>
-                      <span className="selected-file-size">
-                        {formatFileSize(file.size)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <p className="selected-files-info">
+                {files.length} fichier(s) sélectionné(s)
+              </p>
             )}
 
-            <div className="documents-form-actions">
-              <button className="btn" type="submit" disabled={uploading || !files.length}>
-                {uploading ? "Importation en cours..." : "Importer"}
-              </button>
-            </div>
+            <button className="btn" type="submit">
+              Importer
+            </button>
           </form>
 
-          <div className="card documents-list-card">
-            <h2 className="documents-list-title">
+          <div className="card">
+            <h2>
               {selectedFolder === "all"
                 ? "Tous les documents"
                 : `Dossier : ${selectedFolder}`}
@@ -415,17 +278,14 @@ export default function Documents() {
                 {filteredDocuments.map((doc) => (
                   <article key={doc.id} className="document-card">
                     <div className="document-card-top">
-                      <div className="document-card-main">
-                        <h3 title={doc.title}>{doc.title}</h3>
-                        <p className="document-meta" title={doc.original_name}>
+                      <div>
+                        <h3>{doc.title}</h3>
+                        <p className="document-meta">
                           {doc.original_name} • {formatFileSize(doc.file_size)}
                         </p>
                       </div>
 
-                      <span
-                        className="document-folder-chip"
-                        title={doc.folder_path}
-                      >
+                      <span className="document-folder-chip">
                         {doc.folder_path}
                       </span>
                     </div>
@@ -444,29 +304,15 @@ export default function Documents() {
                     </div>
 
                     <div className="document-actions">
-                      <button
-                        type="button"
-                        onClick={() => handlePreview(doc)}
-                        disabled={actionId === doc.id}
-                      >
-                        {actionId === doc.id ? "Patiente..." : "Visualiser"}
+                      <button type="button" onClick={() => handleDownload(doc)}>
+                        Télécharger
                       </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDownload(doc)}
-                        disabled={actionId === doc.id}
-                      >
-                        {actionId === doc.id ? "Patiente..." : "Télécharger"}
-                      </button>
-
                       <button
                         type="button"
                         className="danger-btn"
                         onClick={() => handleDelete(doc.id)}
-                        disabled={actionId === doc.id}
                       >
-                        {actionId === doc.id ? "Patiente..." : "Supprimer"}
+                        Supprimer
                       </button>
                     </div>
                   </article>
@@ -476,24 +322,6 @@ export default function Documents() {
           </div>
         </div>
       </div>
-
-      {preview.open && (
-        <div className="document-preview-overlay" onClick={closePreview}>
-          <div
-            className="document-preview-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="document-preview-header">
-              <h3 title={preview.title}>{preview.title}</h3>
-              <button type="button" onClick={closePreview}>
-                Fermer
-              </button>
-            </div>
-
-            <div className="document-preview-body">{renderPreviewContent()}</div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
