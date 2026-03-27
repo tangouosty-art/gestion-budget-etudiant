@@ -22,7 +22,6 @@ export default function AppLayout() {
           <NavLink to="/dashboard">Dashboard</NavLink>
           <NavLink to="/budget">Budget</NavLink>
           <NavLink to="/tasks">Tâches</NavLink>
-          <NavLink to="/documents">Documents</NavLink>
         </nav>
 
         <div className="sidebar-footer">

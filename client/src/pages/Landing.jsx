@@ -14,17 +14,12 @@ const features = [
     title: "Tâches et rappels",
     text: "Centralise tes échéances importantes pour éviter les oublis du quotidien.",
   },
-  {
-    title: "Documents personnels",
-    text: "Retrouve tes documents utiles dans un seul espace organisé.",
-  },
 ];
 
 const problems = [
   "Budget dépassé sans s’en rendre compte",
   "Petites dépenses oubliées au fil du mois",
   "Tâches importantes non suivies",
-  "Documents dispersés entre téléphone et ordinateur",
 ];
 
 export default function Landing() {
@@ -41,9 +36,8 @@ export default function Landing() {
           <span className="landing-badge">Application étudiante</span>
           <h1>Maîtrise ton budget étudiant avec une interface claire et moderne.</h1>
           <p>
-            Gère ton budget mensuel, suis tes dépenses, organise tes tâches et
-            centralise tes documents dans une seule application pensée pour la
-            vie étudiante.
+            Gère ton budget mensuel, suis tes dépenses, organise tes tâches pour une
+             organisation claire de ta vie étudiante.
           </p>
 
           <div className="landing-actions">
@@ -62,7 +56,8 @@ export default function Landing() {
               <p className="preview-label">Budget du mois</p>
               <h3>750,00 €</h3>
             </div>
-            <span className="status-chip warning">80% utilisé</span>
+            <span className="statu dans une seule application pensée pour la
+            s-chip warning">80% utilisé</span>
           </div>
 
           <div className="preview-stats">
@@ -161,7 +156,7 @@ export default function Landing() {
           </div>
           <div className="highlight-row">
             <span>Documents centralisés</span>
-            <strong>Oui</strong>
+            <strong>Bientôt</strong>
           </div>
         </div>
       </section>

@@ -5,7 +5,6 @@ import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Budget from "../pages/Budget";
 import Tasks from "../pages/Tasks";
-import Documents from "../pages/Documents";
 import ProtectedRoute from "../components/layout/ProtectedRoute";
 import AppLayout from "../components/layout/AppLayout";
 
@@ -40,10 +39,6 @@ export const router = createBrowserRouter([
       {
         path: "/tasks",
         element: <Tasks />,
-      },
-      {
-        path: "/documents",
-        element: <Documents />,
       },
     ],
   },
