@@ -13,7 +13,6 @@ const trendsRoutes = require("./routes/trends.routes");
 const notFound = require("./middlewares/notFound");
 const errorHandler = require("./middlewares/errorHandler");
 const tasksRoutes = require("./routes/tasks.routes");
-const documentsRoutes = require("./routes/documents.routes");
 const { authRateLimiter } = require("./middlewares/rateLimiter");
 
 const app = express();
@@ -41,7 +40,7 @@ app.use("/api/expenses", expensesRoutes);
 app.use("/api/summary", summaryRoutes);
 app.use("/api/trends", trendsRoutes);
 app.use("/api/tasks", tasksRoutes);
-app.use("/api/documents", documentsRoutes);
+
 
 app.use(notFound);
 app.use(errorHandler);
